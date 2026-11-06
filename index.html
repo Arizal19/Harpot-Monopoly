@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Harpot Monopoly — Monopoli Dunia Penyihir</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=IM+Fell+English&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="mapbg"></div>
+<div id="game-canvas-container"></div>
+<div id="pick" hidden></div>
+<div id="lm"></div>
+<div id="floating-text-container"></div>
+<div id="tile-tooltip"></div>
+<div id="event-modal" class="ev"><div id="ev-icon"></div><h3 id="ev-title"></h3><p id="ev-text"></p><div id="ev-list"></div><div id="ev-meter"></div></div>
+<div id="gauge-bar" hidden>
+  <div class="gauge" aria-label="Bar dadu"><i class="gz g1"></i><i class="gz g2"></i><i class="gz g3"></i><div id="dice-gauge-fill"></div><i class="gl" style="left:25%"></i><i class="gl" style="left:66%"></i></div>
+  <div class="gzl"><span style="flex:25">2–3</span><span style="flex:41">4–8</span><span style="flex:34">9–12</span></div>
+  <button id="btn-hold" onpointerdown="gaugeStart(event)" onpointerup="gaugeStop()" onpointercancel="gaugeStop()" oncontextmenu="return false">Tahan &amp; Lepas</button>
+</div>
+<audio id="a-bgm" src="audio/bgm.wav" preload="auto" loop onerror="this.dataset.bad=1"></audio>
+<audio id="a-dice" src="audio/dice.wav" preload="auto" onerror="this.dataset.bad=1"></audio>
+<audio id="a-step" src="audio/step.wav" preload="auto" onerror="this.dataset.bad=1"></audio>
+<audio id="a-coin" src="audio/coin.wav" preload="auto" onerror="this.dataset.bad=1"></audio>
+<audio id="a-take" src="audio/take.wav" preload="auto" onerror="this.dataset.bad=1"></audio>
+<div id="tile-modal"><span class="close-btn" onclick="closeTileModal()">&times;</span>
+  <div class="mhead"><h2 id="modal-title"></h2><span id="modal-tag" class="tag"></span></div>
+  <img id="modal-img" alt=""><div id="modal-sub" hidden></div><p id="modal-desc" class="lore"></p>
+  <div id="modal-fun" hidden><b>✦ Tahukah kamu?</b><span id="modal-fun-t"></span></div>
+  <div class="mgrid"><div><small>Harga</small><b id="modal-price"></b></div><div><small>Pemilik</small><b id="modal-owner"></b></div><div><small>Level</small><b id="modal-level"></b></div></div>
+  <div id="modal-rent"></div><div id="modal-rule" class="rule"></div><button id="modal-build" hidden></button></div>
+<div id="spot-modal"><span class="close-btn" onclick="closeSpot()">&times;</span><h2 id="spot-title"></h2><img id="spot-img" alt=""><p id="spot-desc"></p><div id="spot-chips"></div><p id="spot-var"></p></div>
+<div id="spots"></div>
+<div id="dice-sum"></div>
+<script type="application/json" id="lore">{"tiles": [{"id": 0, "img": "img/tiles/0.jpg", "desc": "Gerbang kastil tempat setiap penyihir memulai perjalanan. Kembang api menyambut siapa pun yang kembali."}, {"id": 1, "img": "img/tiles/1.jpg", "desc": "Rak kayu penuh ramuan warna-warni. Wangi herbalnya membuat pengunjung betah."}, {"id": 2, "img": "img/tiles/2.jpg", "desc": "Peti kas sekolah sihir yang diisi dari iuran dan hadiah. Isinya bisa menolong, bisa juga menagih."}, {"id": 3, "img": "img/tiles/3.jpg", "desc": "Deretan kuali besi mengepulkan asap hijau. Konon ramuannya matang sendiri saat tak ada yang melihat."}, {"id": 4, "img": "img/tiles/4.jpg", "desc": "Cermin berbingkai emas memantulkan keinginan terdalam. Banyak pengunjung lupa waktu menatapnya."}, {"id": 5, "img": "img/tiles/5.jpg", "desc": "Menara batu dengan penangkal petir ungu. Setiap badai mengisi ulang sihirnya."}, {"id": 6, "img": "img/tiles/6.jpg", "desc": "Rak buku menjulang dengan buku yang melayang sendiri. Pengetahuan di sini dijaga lebih ketat daripada emas."}, {"id": 7, "img": "img/tiles/7.jpg", "desc": "Sel batu berpendar ungu tempat penyihir nakal merenung. Pengunjung biasa hanya boleh melihat dari luar."}, {"id": 8, "img": "img/tiles/8.jpg", "desc": "Gua berkilau penuh kristal biru yang berdengung pelan. Para penambang menyebutnya tambang yang bernyanyi."}, {"id": 9, "img": "img/tiles/9.jpg", "desc": "Roda raksasa penuh bintang dan koin. Putarannya tidak pernah sama dua kali."}, {"id": 10, "img": "img/tiles/10.jpg", "desc": "Puing batu tua yang obornya tak pernah padam. Orang bilang apinya dijaga penyihir yang sudah lama pergi."}, {"id": 11, "img": "img/tiles/11.jpg", "desc": "Dapur batu berasap hijau tempat ramuan diracik saat malam. Baunya menyengat, tapi laris."}, {"id": 12, "img": "img/tiles/12.jpg", "desc": "Pohon tua dan jamur bercahaya yang berbisik pada pendatang. Jangan percaya semua yang kamu dengar."}, {"id": 13, "img": "img/tiles/13.jpg", "desc": "Sebuah gulungan melayang dengan segel merah. Siapa membukanya, nasib langsung berubah arah."}, {"id": 14, "img": "img/tiles/14.jpg", "desc": "Kubah dengan teleskop kuningan raksasa. Dari sini para penyihir membaca gerak bintang."}, {"id": 15, "img": "img/tiles/15.jpg", "desc": "Bank batu yang dijaga naga emas melingkar di atas harta. Pinjaman besar, bunganya lebih besar."}, {"id": 16, "img": "img/tiles/16.jpg", "desc": "Padang hijau luas tempat sapu terbang beristirahat. Tenang, sampai ada yang datang menagih."}, {"id": 17, "img": "img/tiles/17.jpg", "desc": "Kandang besi tempat griffin muda dilatih. Hati-hati dengan paruhnya."}, {"id": 18, "img": "img/tiles/18.jpg", "desc": "Gerbang merah berduri dengan rune petir. Konon gerbang ini hanya terbuka satu arah."}, {"id": 19, "img": "img/tiles/19.jpg", "desc": "Taman bunga yang warnanya berganti sesuai suasana hati. Peri kecil sering terlihat di antara kelopaknya."}, {"id": 20, "img": "img/tiles/20.jpg", "desc": "Stasiun sapu terbang sisi utara, lengkap dengan gawang lingkaran untuk latihan."}, {"id": 21, "img": "img/tiles/21.jpg", "desc": "Kios bergaris merah yang menjual tongkat sihir segala bentuk. Tongkat memilih pemiliknya, bukan sebaliknya."}, {"id": 22, "img": "img/tiles/22.jpg", "desc": "Jubah warna pelangi dijahit jarum yang bekerja sendiri. Sekali dipakai, sulit dilepas karena nyaman."}, {"id": 23, "img": "img/tiles/23.jpg", "desc": "Sumur batu yang memancarkan cahaya emas ke langit. Airnya tak pernah surut."}, {"id": 24, "img": "img/tiles/24.jpg", "desc": "Peti kas sekolah sihir yang diisi dari iuran dan hadiah. Isinya bisa menolong, bisa juga menagih."}, {"id": 25, "img": "img/tiles/25.jpg", "desc": "Menara batu gelap yang selalu hening. Penghuninya tak pernah terlihat, tapi lampunya selalu menyala."}, {"id": 26, "img": "img/tiles/26.jpg", "desc": "Kastil megah di tebing dengan banyak menara. Pemiliknya dihormati, atau setidaknya ditakuti."}, {"id": 27, "img": "img/tiles/27.jpg", "desc": "Gerbang berduri yang gemar menjebak pengunjung. Seberapa parah akibatnya, tak ada yang bisa menebak."}, {"id": 28, "img": "img/tiles/28.jpg", "desc": "Singgasana emas bertatah permata di atas lingkaran sihir. Siapa duduk di sini memegang petak termahal."}, {"id": 29, "img": "img/tiles/29.jpg", "desc": "Gulungan denda bersegel merah dan tongkat patah. Mantra terlarang selalu ada harganya."}, {"id": 30, "img": "img/tiles/30.jpg", "desc": "Kedai kayu hangat dengan cangkir madu berapi. Minuman terlaris saat malam bersalju."}, {"id": 31, "img": "img/tiles/31.jpg", "desc": "Menara jam dengan roda gigi emas dan jarum bulan. Waktu di sini berjalan sesuka hatinya."}, {"id": 32, "img": "img/tiles/32.jpg", "desc": "Taman bunga ungu tempat peri berkumpul. Sewanya terasa ringan, sampai tagihan datang."}, {"id": 33, "img": "img/tiles/33.jpg", "desc": "Stasiun sapu terbang sisi selatan, tempat para kurir menunggu penumpang."}, {"id": 34, "img": "img/tiles/34.jpg", "desc": "Meja bendahara dengan timbangan emas. Setiap mantra besar dikenai pajak."}, {"id": 35, "img": "img/tiles/35.jpg", "desc": "Bengkel kecil dengan botol ramuan dan landasan. Murah, ramai, dan selalu berbau belerang."}]}</script>
+<canvas id="fx"></canvas>
+<main id="start">
+  <h1>Harpot Monopoly</h1>
+  <p>Beli petak, lalu bangun saat mendarat di petakmu sendiri sampai jadi Landmark. Putar roda keberuntungan, pilih karakter SR sampai SSSR dengan kemampuan unik, dan jadi penyihir terakhir yang bertahan.</p>
+  <p>Pilih peta</p>
+  <div class="row" role="group" aria-label="Pilih peta" style="margin-bottom:12px"><button id="map1" class="alt" onclick="pickMap(1)">🗺️ Peta Harpot (36 petak)</button><button id="map2" class="alt" onclick="pickMap(2)">🏰 Maps HD (37 petak, lore Harry Potter)</button></div>
+  <p>Satu perangkat, bergiliran</p>
+  <div class="row" role="group" aria-label="Pilih jumlah pemain">
+    <button onclick="begin(2)">2 pemain</button>
+    <button onclick="begin(3)">3 pemain</button>
+    <button onclick="begin(4)">4 pemain</button>
+  </div>
+  <div class="row" style="margin-top:10px"><button class="alt" onclick="begin(3,{bots:1})">Lawan 2 bot (Voldemort &amp; Snape)</button></div>
+  <p style="margin-top:1.4em">Main online berdua (misalnya PC dan iPhone)</p>
+  <div class="row"><button onclick="host()">Buat ruangan</button><input id="code" maxlength="4" placeholder="KODE" aria-label="Kode ruangan"><button class="alt" onclick="join()">Gabung</button></div>
+  <p id="st" role="status"></p>
+  <small>Nama dan tempat di sini karangan orisinal.</small>
+</main>
+<div id="board" hidden></div>
+<div id="hud"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/lore_tiles.js"></script>
+<script src="js/map2.js"></script>
+<script src="js/game.js"></script>
+<script src="js/view.js"></script>
+<script src="js/houses-art.js"></script>
+<script src="js/houses-img.js"></script>
+<script src="js/castle-xray.js"></script>
+</body>
+</html>
